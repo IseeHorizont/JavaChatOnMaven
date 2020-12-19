@@ -1,0 +1,30 @@
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Button?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+
+<VBox fx:id="regVBox" alignment="CENTER" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/11.0.2"
+      fx:controller="ru.geekbrains.client.RegistrationController">
+    <TextField fx:id="login" promptText="Login" maxWidth="200">
+        <VBox.margin>
+            <Insets bottom="10"/>
+        </VBox.margin>
+    </TextField>
+    <TextField fx:id="password" promptText="Password" maxWidth="200">
+        <VBox.margin>
+            <Insets bottom="10"/>
+        </VBox.margin>
+    </TextField>
+    <TextField fx:id="nickname" promptText="Nickname" maxWidth="200">
+        <VBox.margin>
+            <Insets bottom="10"/>
+        </VBox.margin>
+    </TextField>
+    <Button onAction="#tryToRegister" prefWidth="200" text="Register">
+        <VBox.margin>
+            <Insets bottom="10"/>
+        </VBox.margin>
+    </Button>
+    <Label fx:id="result" alignment="CENTER" maxWidth="300"/>
+</VBox>

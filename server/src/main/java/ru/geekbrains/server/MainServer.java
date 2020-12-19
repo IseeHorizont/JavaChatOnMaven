@@ -6,8 +6,16 @@ public class MainServer {
         new Server();
     }
 
-    // 1. Разобраться с кодом
-    // 2. Сделать личные сообщения
-    // /w nick2 секрет -- пишет nick1 -- это сообщение отобразится только у nick2
+    //     1. Разобраться с кодом
+//     2. Смена ника в БД по запросу /changenick newNick
+//
+//    Запрос для проверки ника:
+//    ResultSet rs = statement.executeQuery("SELECT nickname FROM users WHERE nickname = '" + nickname + "'");
+//    if (rs.next()) {
+//        ЕСТЬ!!!
+//    }
+//
+//    Запрос для обновления:
+//    statement.executeUpdate("UPDATE users SET nickname = '"+newNick+"' WHERE nickname = '"+oldNick+"'");
 
 }

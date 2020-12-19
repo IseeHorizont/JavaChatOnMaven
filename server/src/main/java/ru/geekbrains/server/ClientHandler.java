@@ -10,12 +10,11 @@ public class ClientHandler {
     private Socket socket;
     private DataInputStream in;
     private DataOutputStream out;
+    private String nickname;
 
     public String getNickname() {
         return nickname;
     }
-
-    private String nickname;
 
     public ClientHandler(Server server, Socket socket) {
         try {
@@ -28,14 +27,35 @@ public class ClientHandler {
                     while (true) {
                         String str = in.readUTF();
                         // /auth login1 password1
-                        String[] subStrings = str.split(" ");
-                        if (subStrings.length >= 3 && subStrings[0].equals("/auth")) {
-                            String nickFromDB = SQLHandler.getNickByLoginAndPassword(subStrings[1], subStrings[2]);
-                            if (nickFromDB != null) {
-                                sendMsg("/authok");
-                                server.subscribe(this);
-                                nickname = nickFromDB;
-                                break;
+                        if (str.startsWith("/auth")) {
+                            String[] subStrings = str.split(" ", 3);
+                            if (subStrings.length == 3) {
+                                String nickFromDB = SQLHandler.getNickByLoginAndPassword(subStrings[1], subStrings[2]);
+                                if (nickFromDB != null) {
+                                    if (!server.isNickInChat(nickFromDB)) {
+                                        nickname = nickFromDB;
+                                        sendMsg("/authok " + nickname);
+                                        server.subscribe(this);
+                                        break;
+                                    } else {
+                                        sendMsg("This nick already in use");
+                                    }
+                                } else {
+                                    sendMsg("Wrong login/password");
+                                }
+                            } else {
+                                sendMsg("Wrong data format");
+                            }
+                        }
+                        if (str.startsWith("/registration")) {
+                            String[] subStr = str.split(" ");
+                            // /registration login pass nick
+                            if (subStr.length == 4) {
+                                if (SQLHandler.tryToRegister(subStr[1], subStr[2], subStr[3])) {
+                                    sendMsg("Registration complete");
+                                } else {
+                                    sendMsg("Error login/password/nickname");
+                                }
                             }
                         }
                     }
@@ -43,13 +63,38 @@ public class ClientHandler {
                     while (true) {
                         String str = in.readUTF();
                         System.out.println("Сообщение от клиента: " + str);
-                        if (str.equals("/end")) {
-                            break;
-                        }
-                        if (str.startsWith("/w")) {
-                            String[] forPrivateMsg = str.split("\\s", 3);
-                            server.sendPrivateMsg(this, forPrivateMsg[1], forPrivateMsg[2]);
-                        }else {
+                        if (str.startsWith("/")) {
+                            if (str.equals("/end")) {
+                                break;
+                            } else if (str.startsWith("/w")) {
+                                // /w nick hello m8! hi
+                                final String[] subStrings = str.split(" ", 3);
+                                if (subStrings.length == 3) {
+                                    final String toUserNick = subStrings[1];
+                                    if (server.isNickInChat(toUserNick)) {
+                                        server.unicastMsg(toUserNick, "from " + nickname + ": " + subStrings[2]);
+                                        sendMsg("to " + toUserNick + ": " + subStrings[2]);
+                                    } else {
+                                        sendMsg("User with nick '" + toUserNick + "' not found in chat room");
+                                    }
+                                } else {
+                                    sendMsg("Wrong private message");
+                                }
+                            }else if(str.startsWith("/changenick")){
+                                // /changenick newNick
+                                final String[] subStr = str.split(" ");
+                                if(subStr.length == 2){
+                                    if (SQLHandler.tryToChangeNickname(nickname, subStr[1])) {
+                                        server.updateNickname(nickname, subStr[1]);
+                                        sendMsg("Nickname changed");
+                                    } else {
+                                        sendMsg("This nickname is already use");
+                                    }
+                                }else{
+                                    sendMsg("Insert correct nickname");
+                                }
+                            }
+                        } else {
                             server.broadcastMsg(nickname + ": " + str);
                         }
                     }
