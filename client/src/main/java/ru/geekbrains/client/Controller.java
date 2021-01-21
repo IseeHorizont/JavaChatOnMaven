@@ -1,8 +1,6 @@
 package ru.geekbrains.client;
 
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -29,7 +27,10 @@ public class Controller implements Initializable {
     TextArea textArea;
 
     @FXML
-    TextField textField, loginField;
+    TextField textField;
+
+    @FXML
+    TextField loginField;
 
     @FXML
     VBox mainBox;
