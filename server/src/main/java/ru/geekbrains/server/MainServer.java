@@ -5,17 +5,9 @@ public class MainServer {
     public static void main(String[] args) {
         new Server();
     }
-
-    //     1. Разобраться с кодом
-//     2. Смена ника в БД по запросу /changenick newNick
-//
-//    Запрос для проверки ника:
-//    ResultSet rs = statement.executeQuery("SELECT nickname FROM users WHERE nickname = '" + nickname + "'");
-//    if (rs.next()) {
-//        ЕСТЬ!!!
-//    }
-//
-//    Запрос для обновления:
-//    statement.executeUpdate("UPDATE users SET nickname = '"+newNick+"' WHERE nickname = '"+oldNick+"'");
-
+    /**
+    * 1. Добавить в сетевой чат запись локальной истории в текстовый файл на клиенте.
+    * 2. После загрузки клиента показывать ему последние 100 строк чата.
+    * 3* Добавить цензор в чат.
+    * */
 }
