@@ -14,9 +14,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -53,6 +51,7 @@ public class Controller implements Initializable {
     private String nickname;
     private ObservableList<String> clients;
     private boolean authorized;
+    public static File chatHistory;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -66,9 +65,20 @@ public class Controller implements Initializable {
 
         clients = FXCollections.observableArrayList();
         clientsList.setItems(clients);
+
+        // file of local history
+        chatHistory = new File("client/src/main/java/ru/geekbrains/client/chatHistory.txt");
+        if(!(chatHistory.exists())){
+            try {
+                chatHistory.createNewFile();
+            } catch (IOException e) {
+                System.out.println("\"chatHistory.txt\" not found");
+            }
+        }
+
     }
 
-    public void setAuthorized(boolean authorized) {
+    public void setAuthorized(boolean authorized){
         this.authorized = authorized;
         if (authorized) {
             authPanel.setVisible(false);
@@ -94,13 +104,18 @@ public class Controller implements Initializable {
                 ((Stage) mainBox.getScene().getWindow()).setTitle("Java Chat Client: " + nickname);
             }
         });
-
+        try {
+            readChatHistory();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void sendMsg() {
         try {
             if (socket != null && !socket.isClosed()) {
                 String str = textField.getText();
+                str = wordsFilter(str);
                 out.writeUTF(str);
                 textField.clear();
                 textField.requestFocus();
@@ -108,6 +123,17 @@ public class Controller implements Initializable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private String wordsFilter(String str) {
+        String res = "";
+        String stopWords[] = {"Балбес", "Кретин", "Быдло"};
+        for (int i = 0; i < stopWords.length; i++) {
+            if(str.equals(stopWords[i])){
+                res = str.replaceAll(stopWords[i], "'censored word'");
+            }
+        }
+        return res;
     }
 
     public void sendMsg(String msg) {
@@ -151,6 +177,7 @@ public class Controller implements Initializable {
                             String str = in.readUTF();
                             if (!str.startsWith("/")) {
                                 textArea.appendText(str + System.lineSeparator());
+                                writeChatHistory(str + "\n");
                             } else if (str.startsWith("/clientslist")) {
                                 // /clientslist nick1 nick2 nick3
                                 String[] subStr = str.split(" ");
@@ -200,6 +227,19 @@ public class Controller implements Initializable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
 
+    public void writeChatHistory(String msg) throws IOException {
+        try(RandomAccessFile raf = new RandomAccessFile(chatHistory, "rw")){
+            raf.seek(chatHistory.length());
+            raf.writeBytes(msg);
+        }
+    }
+
+    public void readChatHistory() throws IOException {
+        try(RandomAccessFile raf = new RandomAccessFile(chatHistory, "r")){
+            raf.seek(0);
+            textArea.appendText(raf.readUTF());
+        }
     }
 }
